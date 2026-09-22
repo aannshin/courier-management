@@ -34,3 +34,24 @@ body {
     font-weight: bold;
     border-radius: 6px;
 }
+
+input,
+select {
+    padding: 12px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.shipment {
+    background-color: white;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    border-radius: 8px;
+    text-align: left;
+}
+
+hr {
+    margin: 50px 0;
+}

@@ -17,8 +17,27 @@ def home():
     return render_template("index.html")
 
 
-@app.route("/track")
+@app.route("/track", methods=["GET", "POST"])
 def track():
+
+    if request.method == "POST":
+
+        tracking_id = request.form["tracking_id"]
+
+        connection = get_db()
+
+        shipment = connection.execute(
+            "SELECT * FROM shipments WHERE tracking_id = ?",
+            (tracking_id,)
+        ).fetchone()
+
+        connection.close()
+
+        return render_template(
+            "tracking.html",
+            shipment=shipment
+        )
+
     return render_template("track.html")
 
 
@@ -80,12 +99,16 @@ def login():
             session["user_name"] = user["name"]
             session["role"] = user["role"]
 
-            return redirect(url_for("dashboard"))
+            if user["role"] == "admin":
+                return redirect(url_for("admin_dashboard"))
+            elif user["role"] == "agent":
+                return redirect(url_for("agent_dashboard"))
+            else:
+                return redirect(url_for("dashboard"))
 
         return "Invalid email or password."
 
     return render_template("login.html")
-
 
 @app.route("/dashboard")
 def dashboard():
@@ -93,7 +116,7 @@ def dashboard():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    return f"Welcome {session['user_name']}!"
+    return render_template("dashboard.html")
 
 
 @app.route("/logout")
@@ -102,6 +125,73 @@ def logout():
     session.clear()
 
     return redirect(url_for("home"))
+
+@app.route("/admin")
+def admin_dashboard():
+
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("login"))
+
+    connection = get_db()
+
+    shipments = connection.execute("""
+        SELECT shipments.*, users.name AS customer_name
+        FROM shipments
+        LEFT JOIN users ON shipments.customer_id = users.id
+        ORDER BY shipments.id DESC
+    """).fetchall()
+
+    customers = connection.execute(
+        "SELECT * FROM users WHERE role = 'customer'"
+    ).fetchall()
+
+    agents = connection.execute(
+        "SELECT * FROM users WHERE role = 'agent'"
+    ).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "admin_dashboard.html",
+        shipments=shipments,
+        customers=customers,
+        agents=agents
+    )
+
+
+@app.route("/admin/create-shipment", methods=["POST"])
+def create_shipment():
+
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("login"))
+
+    tracking_id = request.form["tracking_id"]
+    customer_id = request.form["customer_id"]
+    receiver_name = request.form["receiver_name"]
+    origin = request.form["origin"]
+    destination = request.form["destination"]
+
+    connection = get_db()
+
+    connection.execute("""
+        INSERT INTO shipments
+        (tracking_id, customer_id, receiver_name, origin,
+         destination, status, current_location)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (
+        tracking_id,
+        customer_id,
+        receiver_name,
+        origin,
+        destination,
+        "Booked",
+        origin
+    ))
+
+    connection.commit()
+    connection.close()
+
+    return redirect(url_for("admin_dashboard"))
 
 
 if __name__ == "__main__":

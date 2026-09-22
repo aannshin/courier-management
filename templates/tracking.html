@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Parcel Details</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h2>Courier Management System</h2>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="hero">
+
+        <h1>Parcel Details</h1>
+
+        {% if shipment %}
+
+            <p><strong>Tracking ID:</strong> {{ shipment["tracking_id"] }}</p>
+
+            <p><strong>Receiver:</strong> {{ shipment["receiver_name"] }}</p>
+
+            <p><strong>Origin:</strong> {{ shipment["origin"] }}</p>
+
+            <p><strong>Destination:</strong> {{ shipment["destination"] }}</p>
+
+            <p><strong>Status:</strong> {{ shipment["status"] }}</p>
+
+            <p><strong>Current Location:</strong> {{ shipment["current_location"] }}</p>
+
+        {% else %}
+
+            <p>Parcel not found.</p>
+
+        {% endif %}
+
+        <br>
+
+        <a href="/dashboard" class="btn">
+            Track Another Parcel
+        </a>
+
+    </div>
+
+</body>
+
+</html>

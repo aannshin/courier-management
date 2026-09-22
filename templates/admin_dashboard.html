@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h2>Courier Management System - Admin</h2>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="hero">
+
+        <h1>Admin Dashboard</h1>
+
+        <p>Welcome, {{ session["user_name"] }}</p>
+
+        <h2>Create New Shipment</h2>
+
+        <form method="POST" action="/admin/create-shipment">
+
+            <input type="text"
+                   name="tracking_id"
+                   placeholder="Tracking ID"
+                   required>
+
+            <br><br>
+
+            <select name="customer_id" required>
+
+                <option value="">Select Customer</option>
+
+                {% for customer in customers %}
+                    <option value="{{ customer['id'] }}">
+                        {{ customer['name'] }} - {{ customer['email'] }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+            <br><br>
+
+            <input type="text"
+                   name="receiver_name"
+                   placeholder="Receiver Name"
+                   required>
+
+            <br><br>
+
+            <input type="text"
+                   name="origin"
+                   placeholder="Origin"
+                   required>
+
+            <br><br>
+
+            <input type="text"
+                   name="destination"
+                   placeholder="Destination"
+                   required>
+
+            <br><br>
+
+            <button type="submit" class="btn">
+                Create Shipment
+            </button>
+
+        </form>
+
+        <hr>
+
+        <h2>All Shipments</h2>
+
+        {% for shipment in shipments %}
+
+            <div class="shipment">
+
+                <p>
+                    <strong>Tracking ID:</strong>
+                    {{ shipment["tracking_id"] }}
+                </p>
+
+                <p>
+                    <strong>Customer:</strong>
+                    {{ shipment["customer_name"] }}
+                </p>
+
+                <p>
+                    <strong>Route:</strong>
+                    {{ shipment["origin"] }}
+                    →
+                    {{ shipment["destination"] }}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {{ shipment["status"] }}
+                </p>
+
+                <p>
+                    <strong>Location:</strong>
+                    {{ shipment["current_location"] }}
+                </p>
+
+            </div>
+
+        {% else %}
+
+            <p>No shipments created yet.</p>
+
+        {% endfor %}
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Customer Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h2>Courier Management System</h2>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="hero">
+
+        <h1>Welcome, {{ session["user_name"] }}!</h1>
+
+        <p>Track your parcel using your tracking ID.</p>
+
+        <form method="POST" action="/track">
+
+            <input type="text"
+                   name="tracking_id"
+                   placeholder="Enter Tracking ID"
+                   required>
+
+            <button type="submit" class="btn">
+                Track Parcel
+            </button>
+
+        </form>
+
+    </div>
+
+</body>
+
+</html>
