@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Agent Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h2>Courier Management System - Agent</h2>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="hero">
+
+        <h1>Delivery Agent Dashboard</h1>
+
+        <p>
+            Welcome, {{ session["user_name"] }}
+        </p>
+
+        <h2>Assigned Shipments</h2>
+
+        {% for shipment in shipments %}
+
+            <div class="shipment">
+
+                <p>
+                    <strong>Tracking ID:</strong>
+                    {{ shipment["tracking_id"] }}
+                </p>
+
+                <p>
+                    <strong>Receiver:</strong>
+                    {{ shipment["receiver_name"] }}
+                </p>
+
+                <p>
+                    <strong>Route:</strong>
+                    {{ shipment["origin"] }}
+                    →
+                    {{ shipment["destination"] }}
+                </p>
+
+                <p>
+                    <strong>Current Status:</strong>
+                    {{ shipment["status"] }}
+                </p>
+
+                <p>
+                    <strong>Current Location:</strong>
+                    {{ shipment["current_location"] }}
+                </p>
+
+                <hr>
+
+                <h3>Update Shipment</h3>
+
+                <form method="POST"
+                      action="/agent/update/{{ shipment['id'] }}">
+
+                    <select name="status" required>
+
+                        <option value="Picked Up">
+                            Picked Up
+                        </option>
+
+                        <option value="In Transit">
+                            In Transit
+                        </option>
+
+                        <option value="Arrived at Hub">
+                            Arrived at Hub
+                        </option>
+
+                        <option value="Out for Delivery">
+                            Out for Delivery
+                        </option>
+
+                        <option value="Delivered">
+                            Delivered
+                        </option>
+
+                    </select>
+
+                    <br><br>
+
+                    <input type="text"
+                           name="location"
+                           placeholder="Current Location"
+                           required>
+
+                    <br><br>
+
+                    <button type="submit" class="btn">
+                        Update Status
+                    </button>
+
+                </form>
+
+            </div>
+
+        {% else %}
+
+            <p>No shipments assigned to you yet.</p>
+
+        {% endfor %}
+
+    </div>
+
+</body>
+
+</html>

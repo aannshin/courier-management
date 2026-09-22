@@ -193,6 +193,85 @@ def create_shipment():
 
     return redirect(url_for("admin_dashboard"))
 
+@app.route("/admin/assign-agent/<int:shipment_id>", methods=["POST"])
+def assign_agent(shipment_id):
+
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("login"))
+
+    agent_id = request.form["agent_id"]
+
+    connection = get_db()
+
+    connection.execute(
+        "UPDATE shipments SET agent_id = ? WHERE id = ?",
+        (agent_id, shipment_id)
+    )
+
+    connection.commit()
+    connection.close()
+
+    return redirect(url_for("admin_dashboard"))
+
+@app.route("/agent")
+def agent_dashboard():
+
+    if "user_id" not in session or session["role"] != "agent":
+        return redirect(url_for("login"))
+
+    connection = get_db()
+
+    shipments = connection.execute("""
+        SELECT * FROM shipments
+        WHERE agent_id = ?
+        ORDER BY id DESC
+    """, (session["user_id"],)).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "agent_dashboard.html",
+        shipments=shipments
+    )
+
+
+@app.route("/agent/update/<int:shipment_id>", methods=["POST"])
+def update_shipment(shipment_id):
+
+    if "user_id" not in session or session["role"] != "agent":
+        return redirect(url_for("login"))
+
+    status = request.form["status"]
+    location = request.form["location"]
+
+    connection = get_db()
+
+    # Make sure the shipment belongs to this agent
+    shipment = connection.execute("""
+        SELECT * FROM shipments
+        WHERE id = ? AND agent_id = ?
+    """, (shipment_id, session["user_id"])).fetchone()
+
+    if shipment:
+
+        connection.execute("""
+            UPDATE shipments
+            SET status = ?, current_location = ?
+            WHERE id = ?
+        """, (status, location, shipment_id))
+
+        connection.execute("""
+            INSERT INTO shipment_updates
+            (shipment_id, status, location)
+            VALUES (?, ?, ?)
+        """, (shipment_id, status, location))
+
+        connection.commit()
+
+    connection.close()
+
+    return redirect(url_for("agent_dashboard"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

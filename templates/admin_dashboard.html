@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 
@@ -15,11 +16,17 @@
         <a href="/logout">Logout</a>
     </div>
 
+
     <div class="hero">
 
         <h1>Admin Dashboard</h1>
 
-        <p>Welcome, {{ session["user_name"] }}</p>
+        <p>
+            Welcome, {{ session["user_name"] }}
+        </p>
+
+
+        <!-- Create Shipment -->
 
         <h2>Create New Shipment</h2>
 
@@ -37,9 +44,11 @@
                 <option value="">Select Customer</option>
 
                 {% for customer in customers %}
+
                     <option value="{{ customer['id'] }}">
                         {{ customer['name'] }} - {{ customer['email'] }}
                     </option>
+
                 {% endfor %}
 
             </select>
@@ -73,7 +82,11 @@
 
         </form>
 
+
         <hr>
+
+
+        <!-- All Shipments -->
 
         <h2>All Shipments</h2>
 
@@ -92,6 +105,11 @@
                 </p>
 
                 <p>
+                    <strong>Receiver:</strong>
+                    {{ shipment["receiver_name"] }}
+                </p>
+
+                <p>
                     <strong>Route:</strong>
                     {{ shipment["origin"] }}
                     →
@@ -104,9 +122,41 @@
                 </p>
 
                 <p>
-                    <strong>Location:</strong>
+                    <strong>Current Location:</strong>
                     {{ shipment["current_location"] }}
                 </p>
+
+
+                <!-- Assign Delivery Agent -->
+
+                <h3>Assign Delivery Agent</h3>
+
+                <form method="POST"
+                      action="/admin/assign-agent/{{ shipment['id'] }}">
+
+                    <select name="agent_id" required>
+
+                        <option value="">
+                            Select Agent
+                        </option>
+
+                        {% for agent in agents %}
+
+                            <option value="{{ agent['id'] }}">
+                                {{ agent['name'] }} - {{ agent['email'] }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <br><br>
+
+                    <button type="submit" class="btn">
+                        Assign Agent
+                    </button>
+
+                </form>
 
             </div>
 
@@ -121,3 +171,4 @@
 </body>
 
 </html>
+```
