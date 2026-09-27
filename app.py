@@ -1,12 +1,16 @@
 import os
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import (
+    Flask, render_template, request, redirect,
+    url_for, session, jsonify
+)
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "courier-secret-key"
 COMMIT = os.getenv("RENDER_GIT_COMMIT", "local")[:7]
+
 
 def get_db():
     connection = sqlite3.connect("courier.db")
@@ -142,6 +146,7 @@ def login():
 
     return render_template("login.html")
 
+
 @app.route("/dashboard")
 def dashboard():
 
@@ -158,9 +163,9 @@ def logout():
 
     return redirect(url_for("home"))
 
+
 @app.route("/admin")
 def admin_dashboard():
-
     if "user_id" not in session or session["role"] != "admin":
         return redirect(url_for("login"))
 
@@ -193,7 +198,6 @@ def admin_dashboard():
 
 @app.route("/admin/create-shipment", methods=["POST"])
 def create_shipment():
-
     if "user_id" not in session or session["role"] != "admin":
         return redirect(url_for("login"))
 
@@ -204,7 +208,13 @@ def create_shipment():
     destination = request.form.get("destination", "").strip()
 
     # Input validation
-    if not tracking_id or not customer_id or not receiver_name or not origin or not destination:
+    if (
+        not tracking_id
+        or not customer_id
+        or not receiver_name
+        or not origin
+        or not destination
+    ):
         return "All shipment fields are required.", 400
 
     connection = get_db()
@@ -229,9 +239,9 @@ def create_shipment():
 
     return redirect(url_for("admin_dashboard"))
 
+
 @app.route("/admin/assign-agent/<int:shipment_id>", methods=["POST"])
 def assign_agent(shipment_id):
-
     if "user_id" not in session or session["role"] != "admin":
         return redirect(url_for("login"))
 
@@ -249,9 +259,9 @@ def assign_agent(shipment_id):
 
     return redirect(url_for("admin_dashboard"))
 
+
 @app.route("/agent")
 def agent_dashboard():
-
     if "user_id" not in session or session["role"] != "agent":
         return redirect(url_for("login"))
 
@@ -273,7 +283,6 @@ def agent_dashboard():
 
 @app.route("/agent/update/<int:shipment_id>", methods=["POST"])
 def update_shipment(shipment_id):
-
     if "user_id" not in session or session["role"] != "agent":
         return redirect(url_for("login"))
 
