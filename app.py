@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+import os
 import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "courier-secret-key"
-
+COMMIT = os.getenv("RENDER_GIT_COMMIT", "local")[:7]
 
 def get_db():
     connection = sqlite3.connect("courier.db")
@@ -14,7 +16,37 @@ def get_db():
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    connection = get_db()
+
+    shipments = connection.execute(
+        "SELECT * FROM shipments ORDER BY id DESC"
+    ).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "index.html",
+        shipments=shipments,
+        commit=COMMIT
+    )
+
+
+@app.route("/api/items")
+def api_items():
+    connection = get_db()
+
+    shipments = connection.execute(
+        "SELECT * FROM shipments ORDER BY id DESC"
+    ).fetchall()
+
+    connection.close()
+
+    return jsonify([dict(shipment) for shipment in shipments])
+
+
+@app.route("/health")
+def health():
+    return {"status": "ok"}
 
 
 @app.route("/track", methods=["GET", "POST"])
@@ -165,11 +197,15 @@ def create_shipment():
     if "user_id" not in session or session["role"] != "admin":
         return redirect(url_for("login"))
 
-    tracking_id = request.form["tracking_id"]
-    customer_id = request.form["customer_id"]
-    receiver_name = request.form["receiver_name"]
-    origin = request.form["origin"]
-    destination = request.form["destination"]
+    tracking_id = request.form.get("tracking_id", "").strip()
+    customer_id = request.form.get("customer_id", "").strip()
+    receiver_name = request.form.get("receiver_name", "").strip()
+    origin = request.form.get("origin", "").strip()
+    destination = request.form.get("destination", "").strip()
+
+    # Input validation
+    if not tracking_id or not customer_id or not receiver_name or not origin or not destination:
+        return "All shipment fields are required.", 400
 
     connection = get_db()
 
